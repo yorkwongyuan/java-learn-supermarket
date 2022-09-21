@@ -20,8 +20,10 @@ public class RunSupermarket {
             m.id = i + "id";
             m.count = i;
             m.name = "超级大好东西" + i;
-            m.purchasePrice = 400;
-            m.soldPrice = 200;
+//            进价
+            m.purchasePrice = Math.random() * 200;
+//            售价
+            m.soldPrice = (1 + Math.random()) * 200;
             all[i] = m;
         }
 
@@ -62,13 +64,34 @@ public class RunSupermarket {
 //            购物逻辑
             while (true) {
                 System.out.println("本店提供" + all.length + "种商品，欢迎选购。请输入商品编号");
+                System.out.println("你身上现在有" + customer.money + "元");
                 int index = scanner.nextInt();
                 if (index < 0) {
                     break;
                 }
+//              如果想要的商品没那么多
+                if (index >= all.length) {
+                    System.out.println("本店没有这种商品，最多输入" + (all.length - 1) + "号商品");
+                    continue;
+                }
                 Products m = all[index];
                 System.out.println("你选购的商品名称是" + m.name + ".单价是" + m.soldPrice + ".请问你要买多少个");
+//                要购买的商品数量
                 int numToBuy = scanner.nextInt();
+//                如果想要买的数量小于0
+                if (numToBuy < 0) {
+                    System.out.println("不买看看也好");
+                    continue;
+                }
+                if (numToBuy > m.count) {
+                    System.out.println("本店库存没那么多");
+                    continue;
+                }
+                //                如果财力不足
+                if (totalCost + (numToBuy * m.soldPrice) > customer.money) {
+                    System.out.println("你的钱不够，你还差"+ customer.money + (totalCost - customer.money) + "元");
+                    continue;
+                }
 
                 totalCost += numToBuy * m.soldPrice;
 //              商品库存减少
@@ -86,11 +109,22 @@ public class RunSupermarket {
 
             System.out.println("顾客" + customer.name + "共消费" + totalCost);
 //            超市收入
-            littleSuperMarket.incomeSum = totalCost;
+            littleSuperMarket.incomeSum += totalCost;
             System.out.println("还继续营业吗？");
             open = scanner.nextBoolean();
         }
         System.out.println("超市关门了");
         System.out.println("今天的营业额为" + littleSuperMarket.incomeSum + ".");
+        for(int i = 0; i< littleSuperMarket.productSold.length; i++) {
+            Products m = all[i];
+//            销售的数量
+            double numSold = littleSuperMarket.productSold[i];
+//          如果卖出了
+            if(numSold > 0) {
+                double incoming = m.soldPrice * numSold;
+                double netIncoming = (m.soldPrice - m.purchasePrice) * numSold;
+                System.out.println(m.name + "卖出了" + numSold + "个" + "收入为：" + incoming + "净利润：" + netIncoming);
+            }
+        }
     }
 }
